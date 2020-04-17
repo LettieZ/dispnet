@@ -5,15 +5,22 @@ from torch.utils.data import DataLoader
 from tensorboardX import SummaryWriter
 import argparse,os
 
+if torch.cuda.is_available():
+    device=torch.device("cuda:0")
+    print("GPU is available")
+else:
+    device=torch.device("cpu")
+    print("GPU is unavailable")
+
+
 writer=SummaryWriter("data_visualization")
 
 parser=argparse.ArgumentParser()
 parser.add_argument("--left_image_path",help="the absolute path of left images")
 parser.add_argument("--right_image_path",help="the absolute path of right images")
 parser.add_argument("--ground_truth_path",help="the absolute path of ground truth")
-
-
 args=parser.parse_args()
+
 
 left_image_path=args.left_image_path
 right_image_path=args.right_image_path
@@ -29,16 +36,19 @@ gt_path="/Users/liuchunpu/kitti/stereoAndMV/data_scene_flow/training/disp_occ_0/
 EPOCH=2
 BATCH_SIZE=4
 dataset=dataloader.Stereo_Dataset(left_image_path,right_image_path,gt_path)
-train_dataloader=DataLoader(dataset=dataset,batch_size=4,shuffle=True,num_workers=4)
+train_dataloader=DataLoader(dataset=dataset,batch_size=4,shuffle=False,num_workers=4)
 print("dataloader competed")
 
 
+
+net=model.DispNet()
 if os.path.exists("current_model.pth"):
     print("trained model exists")
-    net=torch.load("current_model.pth")
+    net.load_state_dict(torch.load("current_model.pth"))
 else:
     print("new model initialization")
-    net=model.DispNet()
+
+net.to(device)
 
 print("model built")
 
@@ -57,6 +67,9 @@ print("loss function defined")
 
 for i in range(EPOCH):
     for step,(input,y) in enumerate(train_dataloader):
+        input=input.to(device)
+        y=y.to(device)
+
         pr6, pr5, pr4, pr3, pr2, pr1 = net(input)
         if step<10:
             output=pr6
@@ -89,5 +102,5 @@ for i in range(EPOCH):
 
 
 
-torch.save(net,"current_model.pth")
+torch.save(net.state_dict(),"current_model.pth")
 writer.close()
