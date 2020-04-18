@@ -5,13 +5,13 @@ from torch.utils.data import DataLoader
 from tensorboardX import SummaryWriter
 import argparse,os
 
+torch.set_num_threads(4)
 if torch.cuda.is_available():
     device=torch.device("cuda:0")
     print("GPU is available")
 else:
     device=torch.device("cpu")
     print("GPU is unavailable")
-
 
 writer=SummaryWriter("data_visualization")
 
@@ -33,10 +33,10 @@ gt_path="/Users/liuchunpu/kitti/stereoAndMV/data_scene_flow/training/disp_occ_0/
 
 
 
-EPOCH=2
-BATCH_SIZE=4
+EPOCH=1000
+BATCH_SIZE=5
 dataset=dataloader.Stereo_Dataset(left_image_path,right_image_path,gt_path)
-train_dataloader=DataLoader(dataset=dataset,batch_size=4,shuffle=False,num_workers=4)
+train_dataloader=DataLoader(dataset=dataset,batch_size=BATCH_SIZE,shuffle=True,num_workers=4)
 print("dataloader competed")
 
 
@@ -60,29 +60,30 @@ print("initialization completed")
 
 optimzer=torch.optim.Adam(net.parameters(),lr=1e-4,weight_decay=0.0004,betas=[0.9,0.999])
 print("optimizer completed")
-scheduler=torch.optim.lr_scheduler.MultiStepLR(optimzer,gamma=0.5,milestones=[10,15,20,30,40])
+scheduler=torch.optim.lr_scheduler.MultiStepLR(optimzer,gamma=0.5,milestones=[300,600,900,1200,1500])
 print("scheduler completed")
 loss_func = torch.nn.L1Loss(reduction='mean')
 print("loss function defined")
 
+
 for i in range(EPOCH):
     for step,(input,y) in enumerate(train_dataloader):
         input=input.to(device)
-        y=y.to(device)
+        y=y.to(device)/256.0
 
         pr6, pr5, pr4, pr3, pr2, pr1 = net(input)
-        if step<10:
-            output=pr6
-        elif (step>=10)&(step<15):
-            output=pr5
-        elif (step>=15)&(step<20):
-            output=pr4
-        elif (step>=20)&(step<30):
-            output=pr3
-        elif (step>=30)&(step<40):
-            output=pr2
-        else:
-            output=pr1
+        # if step<10:
+        #     output=pr6
+        # elif (step>=10)&(step<15):
+        #     output=pr5
+        # elif (step>=15)&(step<20):
+        #     output=pr4
+        # elif (step>=20)&(step<30):
+        #     output=pr3
+        # elif (step>=30)&(step<40):
+        #     output=pr2
+        # else:
+        output=pr1
 
         y=y.float()
         downsampled_y=torch.nn.functional.interpolate(y,size=output[0][0].shape)
@@ -99,6 +100,7 @@ for i in range(EPOCH):
         loss.backward()
         optimzer.step()
         scheduler.step()
+        print(scheduler.get_lr())
 
 
 

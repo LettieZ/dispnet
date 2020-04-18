@@ -1,17 +1,25 @@
 # network architecture test
 import model
-import torch
-
-
-test_tensor=torch.randn(1,6,384,768)
 
 
 net=model.DispNet()
 
-# initialize weights(kaiming_normal) and bias(constant:0)
-# net.weight_bias_init()
-
-
-
-
-net(test_tensor)
+net.weight_bias_init()
+# import torch,dataloader
+# from torch.utils.data import DataLoader
+#
+# left_image_path="/Users/liuchunpu/dispnet/left/"
+# right_image_path="/Users/liuchunpu/dispnet/right/"
+# gt_path="/Users/liuchunpu/dispnet/gt/"
+#
+#
+#
+#
+# dataset=dataloader.Stereo_Dataset(left_image_path,right_image_path,gt_path)
+# train_dataloader=DataLoader(dataset=dataset,batch_size=1,shuffle=True,num_workers=4)
+# print("dataloader competed")
+#
+# x,y=dataset[0]
+# for i in y[0][300]:
+#     print(i)
+# print(y)

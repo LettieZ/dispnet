@@ -190,7 +190,7 @@ class  DispNet(torch.nn.Module):
 
     def weight_bias_init(self):
         for i in self.children():
-            torch.nn.init.kaiming_normal_(i.weight.data)
+            torch.nn.init.kaiming_normal_(i.weight.data,a=0.1,nonlinearity='leaky_relu')
             torch.nn.init.constant_(i.bias.data,0)
 
 
