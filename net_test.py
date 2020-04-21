@@ -1,25 +1,51 @@
 # network architecture test
-import model
+import dataloader
+from PIL import Image
+import numpy as np
+from torchvision import transforms
 
 
-net=model.DispNet()
+transformer2=transforms.Compose([
+    transforms.CenterCrop((384,768)),
+    transforms.ToTensor()
+])
 
-net.weight_bias_init()
-# import torch,dataloader
-# from torch.utils.data import DataLoader
+
+
+left_image_path="/Users/liuchunpu/kitti/stereoAndMV/data_scene_flow/training/image_2/"
+right_image_path="/Users/liuchunpu/kitti/stereoAndMV/data_scene_flow/training/image_3/"
+gt_path="/Users/liuchunpu/kitti/stereoAndMV/data_scene_flow/training/disp_occ_0/"
+
+
+
+dataset=dataloader.Stereo_Dataset(left_image_path=left_image_path,right_image_path=right_image_path,gt_path=gt_path)
+
+
+x,y=dataset[0]
+
+print(y.shape)
+print(y[0][300][500])
+
+
+y_img=Image.open(gt_path+"000000_10.png")
+transformer=transforms.Compose([
+    transforms.CenterCrop((384,768))])
+
+yt=transformer(y_img)
+
+pix=yt.getpixel((500,300))
+
+print(pix)
+
+
+y2=transformer2(y_img)
+
+print(y[0][300][500])
+
+
+# print(yt.size)
 #
-# left_image_path="/Users/liuchunpu/dispnet/left/"
-# right_image_path="/Users/liuchunpu/dispnet/right/"
-# gt_path="/Users/liuchunpu/dispnet/gt/"
+# y_np=np.asarray(yt)
 #
-#
-#
-#
-# dataset=dataloader.Stereo_Dataset(left_image_path,right_image_path,gt_path)
-# train_dataloader=DataLoader(dataset=dataset,batch_size=1,shuffle=True,num_workers=4)
-# print("dataloader competed")
-#
-# x,y=dataset[0]
-# for i in y[0][300]:
-#     print(i)
-# print(y)
+# print(y_np.shape)
+# print(y_np[300][500][2])
