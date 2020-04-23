@@ -34,7 +34,7 @@ gt_path="/Users/liuchunpu/kitti/stereoAndMV/data_scene_flow/training/disp_occ_0/
 
 
 
-EPOCH=600
+EPOCH=700
 BATCH_SIZE=4
 dataset=dataloader.Stereo_Dataset(left_image_path,right_image_path,gt_path)
 train_dataloader=DataLoader(dataset=dataset,batch_size=BATCH_SIZE,shuffle=True,num_workers=4)
@@ -59,18 +59,50 @@ net.to(device)
 print("model built")
 
 
+# optimzer=torch.optim.Adam(net.parameters(),lr=1e-4,weight_decay=0.0004,betas=[0.9,0.999])
+# print("optimizer completed")
 
+# scheduler=torch.optim.lr_scheduler.MultiStepLR(optimzer,gamma=0.5,milestones=[1500,3000,4500,6000,7500])
+# print("scheduler completed")
 
-
-optimzer=torch.optim.Adam(net.parameters(),lr=1e-4,weight_decay=0.0004,betas=[0.9,0.999])
-print("optimizer completed")
-scheduler=torch.optim.lr_scheduler.MultiStepLR(optimzer,gamma=0.1,milestones=[300,600,900,1200,1500])
-print("scheduler completed")
 loss_func = torch.nn.L1Loss(reduction='mean')
 print("loss function defined")
 
 
 for i in range(EPOCH):
+
+    if i<100:
+        optimzer = torch.optim.Adam(net.parameters(), lr=1e-4, weight_decay=0.0004, betas=[0.9, 0.999])
+        print("optimizer completed")
+        scheduler=torch.optim.lr_scheduler.MultiStepLR(optimzer,gamma=0.5,milestones=[300,600,900,1200,1500])
+        print("scheduler completed")
+    elif (i>=100)&(i<200):
+        optimzer = torch.optim.Adam(net.parameters(), lr=1e-4, weight_decay=0.0004, betas=[0.9, 0.999])
+        print("optimizer reset")
+        scheduler=torch.optim.lr_scheduler.MultiStepLR(optimzer,gamma=0.5,milestones=[300,600,900,1200,1500])
+        print("scheduler reset")
+    elif (i>=200)&(i<300):
+        optimzer = torch.optim.Adam(net.parameters(), lr=1e-4, weight_decay=0.0004, betas=[0.9, 0.999])
+        print("optimizer reset")
+        scheduler=torch.optim.lr_scheduler.MultiStepLR(optimzer,gamma=0.5,milestones=[300,600,900,1200,1500])
+        print("scheduler reset")
+    elif (i>=300)&(i<400):
+        optimzer = torch.optim.Adam(net.parameters(), lr=1e-4, weight_decay=0.0004, betas=[0.9, 0.999])
+        print("optimizer reset")
+        scheduler=torch.optim.lr_scheduler.MultiStepLR(optimzer,gamma=0.5,milestones=[300,600,900,1200,1500])
+        print("scheduler reset")
+    elif (i>=400)&(i<500):
+        optimzer = torch.optim.Adam(net.parameters(), lr=1e-4, weight_decay=0.0004, betas=[0.9, 0.999])
+        print("optimizer reset")
+        scheduler=torch.optim.lr_scheduler.MultiStepLR(optimzer,gamma=0.5,milestones=[300,600,900,1200,1500])
+        print("scheduler reset")
+    else:
+        optimzer = torch.optim.Adam(net.parameters(), lr=1e-4, weight_decay=0.0004, betas=[0.9, 0.999])
+        print("optimizer reset")
+        scheduler = torch.optim.lr_scheduler.MultiStepLR(optimzer, gamma=0.5, milestones=[300,600,900,1200,1500])
+        print("scheduler reset")
+
+
     for step,(input,y) in enumerate(train_dataloader):
         input=input.to(device)
         y=y.to(device)/256.0/256
@@ -78,15 +110,15 @@ for i in range(EPOCH):
         total_iter = i * len(train_dataloader) + step
 
         pr6, pr5, pr4, pr3, pr2, pr1 = net(input)
-        if total_iter<1500:
+        if i<100:
             output=pr6
-        elif (total_iter>=1500)&(total_iter<3000):
+        elif (i>=100)&(i<200):
             output=pr5
-        elif (total_iter>=3000)&(total_iter<4500):
+        elif (i>=200)&(i<300):
             output=pr4
-        elif (total_iter>=4500)&(total_iter<6000):
+        elif (i>=300)&(i<400):
             output=pr3
-        elif (total_iter>=6000)&(total_iter<7500):
+        elif (i>=400)&(i<500):
             output=pr2
         else:
             output=pr1
@@ -99,9 +131,9 @@ for i in range(EPOCH):
         average_EPE=test.EPE_ERROR(downsampled_y,output)
 
         # loss value record
-        # print("epoch:",i,"step:",step,"total_iter",total_iter,"loss:",loss.item())
+        print("epoch:",i,"step:",step,"total_iter",total_iter,"loss:",loss.item())
         writer.add_scalar("loss",loss.item(),total_iter)
-        if(total_iter>=7500):
+        if(EPOCH>500):
             writer.add_scalar("EPE:",average_EPE.item(),total_iter)
 
         optimzer.zero_grad()
