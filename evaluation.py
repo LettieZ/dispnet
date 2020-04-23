@@ -3,6 +3,7 @@ from PIL import Image
 from torchvision import transforms
 
 
+# module load
 device=torch.device('cpu')
 net=model.DispNet()
 trained_model_path="/Users/liuchunpu/dispnet/current_model.pth"
@@ -45,6 +46,7 @@ input_tensor=torch.cat((left_image_tensor,right_image_tensor),0)
 input_tensor=input_tensor.unsqueeze(0)
 
 
+# predictions of various scales
 pr6,pr5,pr4,pr3,pr2,output_tensor=net(input_tensor)
 output_tensor=output_tensor[0][0]*256*256
 
