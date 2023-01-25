@@ -1,7 +1,7 @@
 from PIL import Image
 from torchvision import transforms
 
-gt_path="/Users/liuchunpu/kitti/stereoAndMV/data_scene_flow/training/disp_occ_0/000000_10.png"
+gt_path="kitti/training/disp_occ_0/000000_10.png"
 
 
 gt_image=Image.open(gt_path)

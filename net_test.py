@@ -12,9 +12,9 @@ transformer2=transforms.Compose([
 
 
 
-left_image_path="/Users/liuchunpu/kitti/stereoAndMV/data_scene_flow/training/image_2/"
-right_image_path="/Users/liuchunpu/kitti/stereoAndMV/data_scene_flow/training/image_3/"
-gt_path="/Users/liuchunpu/kitti/stereoAndMV/data_scene_flow/training/disp_occ_0/"
+left_image_path="kitti/training/image_2/"
+right_image_path="kitti/training/image_3/"
+gt_path="kitti/training/disp_occ_0/"
 
 
 

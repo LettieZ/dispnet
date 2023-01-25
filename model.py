@@ -68,123 +68,140 @@ class  DispNet(torch.nn.Module):
     # decoder part end
 
     # weight and bias initialization remain undone
+    '''dispnetc中的权衡跟踪初始化策略，可供参考：
+     for m in self.modules():
+            if isinstance(m, nn.Conv2d) or isinstance(m, nn.ConvTranspose2d):
+                # n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
+                # m.weight.data.normal_(0, 0.02 / n)
+                # m.weight.data.normal_(0, 0.02)
+                kaiming_normal(m.weight.data)
+                # UserWarning: nn.init.kaiming_normal is now deprecated in favor of nn.init.kaiming_normal_.
+                #   kaiming_normal(m.weight.data)
+                if m.bias is not None:
+                    m.bias.data.zero_()
+            elif isinstance(m, nn.BatchNorm2d):
+                m.weight.data.fill_(1)
+                m.bias.data.zero_()
+
+    #self.freeze()
+    '''
 
     def forward(self,x):
 
         conv1=self.conv1(x)
         conv1=F.leaky_relu(conv1,negative_slope=0.1)
-        # print(conv1.shape)
+        print('conv1.shape:',conv1.shape)
 
         conv2=self.conv2(conv1)
         conv2=F.leaky_relu(conv2,negative_slope=0.1)
-        # print(conv2.shape)
+        print('conv2.shape:',conv2.shape)
 
         conv3a=self.conv3a(conv2)
         conv3a=F.leaky_relu(conv3a,negative_slope=0.1)
-        # print(conv3a.shape)
+        print('conv3.shape:',conv3a.shape)
 
         conv3b=self.conv3b(conv3a)
         conv3b=F.leaky_relu(conv3b,negative_slope=0.1)
-        # print(conv3b.shape)
+        print('conv3b.shape:',conv3b.shape)
 
         conv4a=self.conv4a(conv3b)
         conv4a=F.leaky_relu(conv4a,negative_slope=0.1)
-        # print(conv4a.shape)
+        print('conv4a.shape:',conv4a.shape)
 
         conv4b=self.conv4b(conv4a)
         conv4b=F.leaky_relu(conv4b,negative_slope=0.1)
-        # print(conv4b.shape)
+        print('conv4b.shape:',conv4b.shape)
 
         conv5a=self.conv5a(conv4b)
         conv5a=F.leaky_relu(conv5a,negative_slope=0.1)
-        # print(conv5a.shape)
+        print('conv5a.shape:',conv5a.shape)
 
         conv5b=self.conv5b(conv5a)
         conv5b=F.leaky_relu(conv5b,negative_slope=0.1)
-        # print(conv5b.shape)
+        print('conv5b.shape:',conv5b.shape)
 
         conv6a=self.conv6a(conv5b)
         conv6a=F.leaky_relu(conv6a,negative_slope=0.1)
-        # print(conv6a.shape)
+        print('conv6a.shape:',conv6a.shape)
 
         conv6b=self.conv6b(conv6a)
         conv6b=F.leaky_relu(conv6b,negative_slope=0.1)
-        # print(conv6b.shape)
+        print('conv6b.shape:',conv6b.shape)
 
         pr6=self.conv_predict_flow6(conv6b)
-        # print(pr6.shape)
+        print('pr6.shape:',pr6.shape)
 
 
         upconv5=self.upconv5(conv6b)
         upconv5=F.leaky_relu(upconv5,negative_slope=0.1)
-        # print(upconv5.shape)
+        print('upconv5.shape:',upconv5.shape)
 
 
         larger_pr6=self.upsample_flow6to5(pr6)
-        # print(larger_pr6.shape)
+        print('larger_pr6.shape:',larger_pr6.shape)
         iconv5=torch.cat((upconv5,larger_pr6,conv5b),1)
-        # print(iconv5.shape)
+        print(iconv5.shape)
         iconv5=self.iconv5(iconv5)
-        # print(iconv5.shape)
+        print('iconv5.shape:',iconv5.shape)
 
         pr5=self.conv_predict_flow5(iconv5)
-        # print(pr5.shape)
+        print('pr5.shape:',pr5.shape)
 
         upconv4=self.upconv4(iconv5)
         upconv4=F.leaky_relu(upconv4,negative_slope=0.1)
-        # print(upconv4.shape)
+        print('upconv4.shape:',upconv4.shape)
 
         larger_pr5=self.upsample_flow5to4(pr5)
-        # print(larger_pr5.shape)
+        print('larger_pr5.shape:',larger_pr5.shape)
         iconv4=torch.cat((upconv4,larger_pr5,conv4b),1)
-        # print(iconv4.shape)
+        print('**cat_iconv4.shape:',iconv4.shape)
         iconv4=self.iconv4(iconv4)
-        # print(iconv4.shape)
+        print('iconv4.shape:',iconv4.shape)
 
         pr4=self.conv_predict_flow4(iconv4)
-        # print(pr4.shape)
+        print('pr4.shape:',pr4.shape)
 
         upconv3=self.upconv3(iconv4)
         upconv3=F.leaky_relu(upconv3,negative_slope=0.1)
-        # print(upconv3.shape)
+        print('upconv3.shape:',upconv3.shape)
 
         larger_pr4=self.upsample_flow4to3(pr4)
-        # print(larger_pr4.shape)
+        print('larger_pr4.shape:',larger_pr4.shape)
         iconv3=torch.cat((upconv3,larger_pr4,conv3b),1)
-        # print(iconv3.shape)
+        print('**cat_iconv3.shape:',iconv3.shape)
         iconv3=self.iconv3(iconv3)
-        # print(iconv3.shape)
+        print('iconv3.shape:',iconv3.shape)
 
         pr3=self.conv_predict_flow3(iconv3)
-        # print(pr3.shape)
+        print('pr3.shape:',pr3.shape)
 
         upconv2=self.upconv2(iconv3)
         upconv2=F.leaky_relu(upconv2,negative_slope=0.1)
-        # print(upconv2.shape)
+        print('upconv2.shape:',upconv2.shape)
 
         larger_pr3=self.upsample_flow3to2(pr3)
-        # print(larger_pr3.shape)
+        print('larger_pr3.shape:',larger_pr3.shape)
         iconv2=torch.cat((upconv2,larger_pr3,conv2),1)
-        # print(iconv2.shape)
+        print('**cat_iconv2.shape:',iconv2.shape)
         iconv2=self.iconv2(iconv2)
-        # print(iconv2.shape)
+        print('iconv2.shape:',iconv2.shape)
 
         pr2=self.conv_predict_flow2(iconv2)
-        # print(pr2.shape)
+        print('pr2.shape:',pr2.shape)
 
         upconv1=self.upconv1(iconv2)
         upconv1=F.leaky_relu(upconv1,negative_slope=0.1)
-        # print(upconv1.shape)
+        print('upconv1.shape',upconv1.shape)
 
         larger_pr2=self.upsample_flow2to1(pr2)
-        # print(larger_pr2.shape)
+        print('larger_pr2.shape',larger_pr2.shape)
         iconv1=torch.cat((upconv1,larger_pr2,conv1),1)
-        # print(iconv1.shape)
+        print('**cat_iconv1.shape:',iconv1.shape)
         iconv1=self.iconv1(iconv1)
-        # print(iconv1.shape)
+        print('iconv1.shape:',iconv1.shape)
 
         pr1=self.conv_predict_flow1(iconv1)
-        # print(pr1.shape)
+        print('pr1.shape:',pr1.shape)
 
         return pr6,pr5,pr4,pr3,pr2,pr1
 

@@ -6,7 +6,9 @@ from tensorboardX import SummaryWriter
 import argparse,os
 import test
 
-torch.set_num_threads(4)
+# torch.set_num_threads(int thread)  
+
+torch.set_num_threads(4) # 多线程
 if torch.cuda.is_available():
     device=torch.device("cuda:0")
     print("GPU is available")
@@ -28,16 +30,17 @@ right_image_path=args.right_image_path
 gt_path=args.ground_truth_path
 
 
-left_image_path="/Users/liuchunpu/kitti/stereoAndMV/data_scene_flow/training/image_2/"
-right_image_path="/Users/liuchunpu/kitti/stereoAndMV/data_scene_flow/training/image_3/"
-gt_path="/Users/liuchunpu/kitti/stereoAndMV/data_scene_flow/training/disp_occ_0/"
+left_image_path="kitti/training/image_2/"
+right_image_path="kitti/training/image_3/"
+gt_path="kitti/training/disp_occ_0/"
 
 
 
-EPOCH=700
+EPOCH=1000
+#EPOCH=70
 BATCH_SIZE=4
 dataset=dataloader.Stereo_Dataset(left_image_path,right_image_path,gt_path)
-train_dataloader=DataLoader(dataset=dataset,batch_size=BATCH_SIZE,shuffle=True,num_workers=4)
+train_dataloader=DataLoader(dataset=dataset,batch_size=BATCH_SIZE,shuffle=True,num_workers=4)  # num_workers=4改为0,多进程需要在main函数中运行
 print("dataloader competed")
 
 
@@ -71,27 +74,27 @@ print("loss function defined")
 
 for i in range(EPOCH):
 
-    if i<100:
+    if i<10:
         optimzer = torch.optim.Adam(net.parameters(), lr=1e-4, weight_decay=0.0004, betas=[0.9, 0.999])
         print("optimizer completed")
         scheduler=torch.optim.lr_scheduler.MultiStepLR(optimzer,gamma=0.5,milestones=[300,600,900,1200,1500])
         print("scheduler completed")
-    elif (i>=100)&(i<200):
+    elif (i>=10)&(i<20):
         optimzer = torch.optim.Adam(net.parameters(), lr=1e-4, weight_decay=0.0004, betas=[0.9, 0.999])
         print("optimizer reset")
         scheduler=torch.optim.lr_scheduler.MultiStepLR(optimzer,gamma=0.5,milestones=[300,600,900,1200,1500])
         print("scheduler reset")
-    elif (i>=200)&(i<300):
+    elif (i>=20)&(i<30):
         optimzer = torch.optim.Adam(net.parameters(), lr=1e-4, weight_decay=0.0004, betas=[0.9, 0.999])
         print("optimizer reset")
         scheduler=torch.optim.lr_scheduler.MultiStepLR(optimzer,gamma=0.5,milestones=[300,600,900,1200,1500])
         print("scheduler reset")
-    elif (i>=300)&(i<400):
+    elif (i>=30)&(i<40):
         optimzer = torch.optim.Adam(net.parameters(), lr=1e-4, weight_decay=0.0004, betas=[0.9, 0.999])
         print("optimizer reset")
         scheduler=torch.optim.lr_scheduler.MultiStepLR(optimzer,gamma=0.5,milestones=[300,600,900,1200,1500])
         print("scheduler reset")
-    elif (i>=400)&(i<500):
+    elif (i>=40)&(i<50):
         optimzer = torch.optim.Adam(net.parameters(), lr=1e-4, weight_decay=0.0004, betas=[0.9, 0.999])
         print("optimizer reset")
         scheduler=torch.optim.lr_scheduler.MultiStepLR(optimzer,gamma=0.5,milestones=[300,600,900,1200,1500])
@@ -113,15 +116,15 @@ for i in range(EPOCH):
         if i<100:
             output=pr6
         elif (i>=100)&(i<200):
-            output=pr5
+             output=pr5
         elif (i>=200)&(i<300):
-            output=pr4
+             output=pr4
         elif (i>=300)&(i<400):
-            output=pr3
+             output=pr3
         elif (i>=400)&(i<500):
-            output=pr2
+             output=pr2
         else:
-            output=pr1
+             output=pr1
 
 
         y=y.float()
